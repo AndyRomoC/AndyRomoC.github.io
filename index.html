@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BorregoSwap</title>
+<style>
+:root{
+  --navy:#0B2250; --navy2:#13306E; --blue:#1E4FD6; --gold:#F0A500; --gold-light:#FFD873;
+  --cream:#FAF7F0; --paper:#FFFFFF; --line:#E4DFD3; --ink:#161B29; --ink-soft:#5B6273;
+  --green:#2E8B57; --radius:14px;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  box-sizing:border-box;
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--cream);color:var(--ink);min-height:100%;}
+::-webkit-scrollbar{width:0;height:0;}
+
+/* ---- Top bar ---- */
+header{
+  position:sticky;top:0;z-index:30;background:var(--navy);
+  padding:calc(14px + env(safe-area-inset-top,0px)) 20px 14px;
+  display:flex;align-items:center;gap:14px;
+}
+.brand{display:flex;align-items:center;gap:9px;color:#fff;font-weight:800;font-size:19px;letter-spacing:-0.02em;white-space:nowrap;}
+.brand .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--gold-light));display:flex;align-items:center;justify-content:center;font-size:16px;}
+.search-wrap{flex:1;display:flex;align-items:center;background:#fff;border-radius:999px;padding:9px 14px;gap:8px;min-width:0;}
+.search-wrap input{border:none;outline:none;flex:1;font-size:14.5px;min-width:0;background:transparent;}
+.credits-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);color:var(--gold-light);padding:8px 12px;border-radius:999px;font-weight:700;font-size:13.5px;white-space:nowrap;}
+
+/* ---- Filters ---- */
+.filters{display:flex;gap:8px;overflow-x:auto;padding:14px 20px 4px;max-width:900px;margin:0 auto;}
+.chip{flex:none;border:1.5px solid var(--line);background:#fff;padding:7px 14px;border-radius:999px;font-size:13px;color:var(--ink-soft);cursor:pointer;transition:.15s;}
+.chip.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+
+main{max-width:900px;margin:0 auto;padding:10px 20px 60px;}
+.section-head{font-size:13px;color:var(--ink-soft);margin:18px 2px 10px;}
+
+/* ---- Student cards ---- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:16px;cursor:pointer;transition:transform .15s,box-shadow .15s;}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(11,34,80,.08);}
+.card-top{display:flex;gap:12px;align-items:center;}
+.avatar{width:50px;height:50px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:17px;}
+.card-name{font-weight:700;font-size:15.5px;}
+.card-role{font-size:12.5px;color:var(--ink-soft);margin-top:1px;}
+.verified{display:inline-flex;align-items:center;gap:3px;color:var(--green);font-size:11px;font-weight:700;margin-top:3px;}
+.card-skills{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+.skill-tag{background:#EEF2FF;color:var(--blue);font-size:11.5px;padding:4px 9px;border-radius:7px;font-weight:600;}
+.card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:13px;font-size:12.5px;color:var(--ink-soft);}
+.stars{color:var(--gold);font-weight:700;}
+.rate{font-weight:700;color:var(--navy);}
+
+/* ---- Panel (profile / booking / chat / review) ---- */
+.overlay{position:fixed;inset:0;background:rgba(11,17,30,.45);z-index:40;display:none;}
+.overlay.show{display:block;}
+.panel{
+  position:fixed;top:0;right:0;height:100%;width:min(440px,100%);background:var(--cream);
+  z-index:41;transform:translateX(100%);transition:transform .25s ease;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  display:flex;flex-direction:column;
+}
+.panel.show{transform:translateX(0);}
+.panel-head{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);background:var(--paper);}
+.back-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+.panel-title{font-weight:700;font-size:16px;}
+.panel-body{flex:1;overflow-y:auto;padding:20px;}
+
+/* profile */
+.profile-head{display:flex;gap:14px;align-items:center;}
+.profile-head .avatar{width:64px;height:64px;font-size:21px;}
+.p-name{font-size:19px;font-weight:800;}
+.p-sub{font-size:13.5px;color:var(--ink-soft);margin-top:2px;}
+.block{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:15px;margin-top:16px;}
+.block h4{margin:0 0 8px;font-size:12.5px;color:var(--ink-soft);text-transform:none;letter-spacing:0;}
+.bio{font-size:14px;line-height:1.55;}
+.skill-tag.big{font-size:12.5px;padding:6px 11px;}
+.courses li{font-size:13.5px;margin-bottom:6px;color:var(--ink);}
+.review{padding:10px 0;border-bottom:1px solid var(--line);}
+.review:last-child{border-bottom:none;}
+.review-top{display:flex;justify-content:space-between;font-size:13px;font-weight:700;}
+.review p{margin:5px 0 0;font-size:13.5px;color:var(--ink-soft);}
+.cta{display:block;width:100%;background:var(--navy);color:#fff;border:none;padding:14px;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;margin-top:20px;}
+.cta.gold{background:var(--gold);color:var(--navy);}
+.cta.ghost{background:transparent;border:1.5px solid var(--navy);color:var(--navy);}
+
+/* booking form */
+label.field{display:block;font-size:12.5px;color:var(--ink-soft);margin:14px 0 6px;font-weight:600;}
+.slot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.slot{border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:10px 4px;text-align:center;font-size:13px;cursor:pointer;}
+.slot.sel{background:var(--navy);color:#fff;border-color:var(--navy);}
+.loc-row{display:flex;gap:8px;flex-wrap:wrap;}
+.loc-chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;font-size:13px;cursor:pointer;}
+.loc-chip.sel{background:var(--gold);border-color:var(--gold);color:var(--navy);font-weight:700;}
+
+/* chat */
+.chat-log{display:flex;flex-direction:column;gap:10px;}
+.msg{max-width:78%;padding:10px 13px;border-radius:14px;font-size:13.5px;line-height:1.4;}
+.msg.them{background:#fff;border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px;}
+.msg.me{background:var(--blue);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
+.chat-input-row{display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--line);background:var(--paper);}
+.chat-input-row input{flex:1;border:1.5px solid var(--line);border-radius:999px;padding:10px 14px;font-size:14px;outline:none;}
+.send-btn{background:var(--navy);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;flex:none;}
+
+/* review/credits */
+.star-row{display:flex;gap:6px;justify-content:center;margin:20px 0 6px;}
+.star{font-size:34px;cursor:pointer;color:#D9D4C4;}
+.star.on{color:var(--gold);}
+.credit-award{text-align:center;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border-radius:16px;padding:26px 18px;margin-top:18px;}
+.credit-award .num{font-size:38px;font-weight:800;color:var(--gold-light);}
+.credit-award .label{font-size:12.5px;opacity:.85;margin-top:4px;}
+textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;font-family:inherit;resize:vertical;min-height:64px;margin-top:14px;}
+
+.empty{text-align:center;color:var(--ink-soft);font-size:13.5px;padding:40px 10px;}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span class="mark">🐏</span>BorregoSwap</div>
+  <div class="search-wrap">
+    <span>🔎</span>
+    <input id="searchInput" placeholder="Search a skill — Python, Excel, pitch deck…" oninput="renderCards()">
+  </div>
+  <div class="credits-pill">🪙 <span id="myCredits">8</span> credits</div>
+</header>
+
+<div class="filters" id="filters"></div>
+
+<main>
+  <div class="section-head" id="resultsLabel">Helpers near you</div>
+  <div class="grid" id="cardGrid"></div>
+</main>
+
+<div class="overlay" id="overlay" onclick="closeAllPanels()"></div>
+
+<!-- PROFILE PANEL -->
+<div class="panel" id="profilePanel">
+  <div class="panel-head"><button class="back-btn" onclick="closeAllPanels()">✕</button><div class="panel-title">Helper profile</div></div>
+  <div class="panel-body" id="profileBody"></div>
+</div>
+
+<!-- BOOKING PANEL -->
+<div class="panel" id="bookingPanel">
+  <div class="panel-head"><button class="back-btn" onclick="openProfilePanel()">←</button><div class="panel-title">Book a session</div></div>
+  <div class="panel-body" id="bookingBody"></div>
+</div>
+
+<!-- CHAT PANEL -->
+<div class="panel" id="chatPanel" style="padding-bottom:0;">
+  <div class="panel-head"><button class="back-btn" onclick="closeAllPanels()">✕</button><div class="panel-title" id="chatTitle">Chat</div></div>
+  <div class="panel-body" id="chatLog" style="padding-bottom:10px;"></div>
+  <div class="chat-input-row">
+    <input id="chatInput" placeholder="Message your helper…" onkeydown="if(event.key==='Enter')sendMsg()">
+    <button class="send-btn" onclick="sendMsg()">➤</button>
+  </div>
+</div>
+
+<!-- REVIEW PANEL -->
+<div class="panel" id="reviewPanel">
+  <div class="panel-head"><button class="back-btn" onclick="closeAllPanels()">✕</button><div class="panel-title">Rate your session</div></div>
+  <div class="panel-body" id="reviewBody"></div>
+</div>
+
+<script>
+const students = [
+ {id:1,name:"Sofía Martínez",career:"Industrial Engineering",sem:"6th semester",rate:1,avatarColor:"#1E4FD6",
+  skills:["Excel","Data Analysis","Problem Solving"],bio:"I love turning messy spreadsheets into clear decisions. I've tutored classmates in Excel, statistics and process modeling for two semesters.",
+  courses:["Advanced Statistics","Lean Six Sigma workshop","Google Data Analytics cert.","English C1"],
+  rating:4.9,reviewsN:12,
+  reviews:[{who:"Diego R.",stars:5,text:"Explained my Excel model in 20 minutes, saved my project."},{who:"Ana S.",stars:5,text:"Super patient, clear step by step."}]},
+ {id:2,name:"Diego Ramírez",career:"Computer Science",sem:"8th semester",rate:1,avatarColor:"#2E8B57",
+  skills:["React","Python","APIs"],bio:"CS senior who ships side projects for fun. Happy to help with app architecture, debugging, or getting your MVP off the ground.",
+  courses:["Mobile App Dev","AWS Cloud Practitioner","Hackathon Tec 2025 — 2nd place","Databases II"],
+  rating:4.8,reviewsN:21,
+  reviews:[{who:"Marjel T.",stars:5,text:"Fixed our app's backend bug in one sitting."},{who:"Luis F.",stars:4,text:"Great explanations, a bit fast at times."}]},
+ {id:3,name:"Valeria Torres",career:"Graphic Design",sem:"4th semester",rate:1,avatarColor:"#C2410C",
+  skills:["Figma","Branding","Pitch Decks"],bio:"I help teams make their ideas look as good as they actually are — decks, logos, and clean UI mockups.",
+  courses:["Brand Identity Workshop","Figma for Teams cert.","Typography II"],
+  rating:4.7,reviewsN:9,
+  reviews:[{who:"Santiago O.",stars:5,text:"Turned our ugly deck into something investor-ready."}]},
+ {id:4,name:"Andrés Leopoldo",career:"Finance",sem:"7th semester",rate:1,avatarColor:"#7C3AED",
+  skills:["Financial Modeling","Pitch Decks","Excel"],bio:"I build the numbers behind the idea: budgets, projections, break-even — so your pitch holds up under questions.",
+  courses:["Corporate Finance II","Venture Capital workshop","CFA Level 1 prep"],
+  rating:5.0,reviewsN:6,
+  reviews:[{who:"Ana S.",stars:5,text:"Our break-even model finally made sense."}]},
+ {id:5,name:"Alex R.",career:"Mechatronics",sem:"6th semester",rate:1,avatarColor:"#DC2626",
+  skills:["Arduino","CAD","Prototyping"],bio:"Give me a rough idea and I'll help you get a working prototype — wiring, 3D printing, or CAD files.",
+  courses:["Robotics II","SolidWorks cert.","Robotics Competition 2025"],
+  rating:4.8,reviewsN:14,
+  reviews:[{who:"Mario G.",stars:5,text:"Helped me wire my sensor project the night before demo day."}]},
+ {id:6,name:"Ana Sofía G.",career:"Marketing",sem:"5th semester",rate:1,avatarColor:"#0891B2",
+  skills:["Social Media","Copywriting","Branding"],bio:"I've run marketing for two student orgs — I can help plan launch content or sharpen your messaging.",
+  courses:["Digital Marketing cert.","Consumer Behavior","Content Strategy workshop"],
+  rating:4.6,reviewsN:11,
+  reviews:[{who:"Diego R.",stars:4,text:"Great content calendar, very organized."}]}
+];
+
+const allSkills = ["All","Excel","Python","React","Figma","Financial Modeling","Arduino","Social Media","Branding","Pitch Decks","Data Analysis"];
+let activeFilter = "All";
+let currentStudent = null, currentSlot=null, currentLoc=null;
+let credits = 8;
+
+function initFilters(){
+  const f = document.getElementById('filters');
+  f.innerHTML = allSkills.map(s=>`<div class="chip ${s===activeFilter?'active':''}" onclick="setFilter('${s}')">${s}</div>`).join('');
+}
+function setFilter(s){ activeFilter = s; initFilters(); renderCards(); }
+
+function renderCards(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  let list = students.filter(s=>{
+    const matchesFilter = activeFilter==="All" || s.skills.includes(activeFilter);
+    const matchesSearch = !q || s.name.toLowerCase().includes(q) || s.career.toLowerCase().includes(q) || s.skills.some(sk=>sk.toLowerCase().includes(q));
+    return matchesFilter && matchesSearch;
+  });
+  const grid = document.getElementById('cardGrid');
+  document.getElementById('resultsLabel').textContent = q ? `Results for "${q}"` : "Helpers near you";
+  if(list.length===0){ grid.innerHTML = `<div class="empty">No helpers match that search yet.<br>Try a broader skill or clear the filter.</div>`; return; }
+  grid.innerHTML = list.map(s=>`
+    <div class="card" onclick="openProfile(${s.id})">
+      <div class="card-top">
+        <div class="avatar" style="background:${s.avatarColor}">${s.name.split(' ').map(x=>x[0]).slice(0,2).join('')}</div>
+        <div>
+          <div class="card-name">${s.name}</div>
+          <div class="card-role">${s.career} · ${s.sem}</div>
+          <div class="verified">✓ Verified Tec student</div>
+        </div>
+      </div>
+      <div class="card-skills">${s.skills.map(sk=>`<span class="skill-tag">${sk}</span>`).join('')}</div>
+      <div class="card-foot"><span class="stars">★ ${s.rating} (${s.reviewsN})</span><span class="rate">${s.rate} credit/hr</span></div>
+    </div>`).join('');
+}
+
+function openProfile(id){
+  currentStudent = students.find(s=>s.id===id);
+  const s = currentStudent;
+  document.getElementById('profileBody').innerHTML = `
+    <div class="profile-head">
+      <div class="avatar" style="background:${s.avatarColor}">${s.name.split(' ').map(x=>x[0]).slice(0,2).join('')}</div>
+      <div><div class="p-name">${s.name}</div><div class="p-sub">${s.career} · ${s.sem}</div><div class="verified">✓ Verified Tec student</div></div>
+    </div>
+    <div class="block"><h4>About</h4><div class="bio">${s.bio}</div></div>
+    <div class="block"><h4>Skills</h4><div class="card-skills">${s.skills.map(sk=>`<span class="skill-tag big">${sk}</span>`).join('')}</div></div>
+    <div class="block"><h4>Courses & activities</h4><ul class="courses">${s.courses.map(c=>`<li>• ${c}</li>`).join('')}</ul></div>
+    <div class="block"><h4>Reviews — ★ ${s.rating} (${s.reviewsN})</h4>${s.reviews.map(r=>`<div class="review"><div class="review-top"><span>${r.who}</span><span>${'★'.repeat(r.stars)}</span></div><p>${r.text}</p></div>`).join('')}</div>
+    <button class="cta" onclick="openBooking()">Book a session — ${s.rate} credit/hr</button>
+    <button class="cta ghost" onclick="openChat()">Message ${s.name.split(' ')[0]}</button>
+  `;
+  showPanel('profilePanel');
+}
+function openProfilePanel(){ showPanel('profilePanel'); }
+
+function openBooking(){
+  currentSlot=null; currentLoc=null;
+  const slots = ["Mon 4pm","Mon 6pm","Tue 11am","Wed 5pm","Thu 2pm","Fri 10am"];
+  const locs = ["Library","CEDES","Online call","Student lounge"];
+  document.getElementById('bookingBody').innerHTML = `
+    <div style="font-size:14px;color:var(--ink-soft)">Booking with <b style="color:var(--ink)">${currentStudent.name}</b></div>
+    <label class="field">Pick a time</label>
+    <div class="slot-grid">${slots.map(t=>`<div class="slot" data-t="${t}" onclick="pickSlot(this,'${t}')">${t}</div>`).join('')}</div>
+    <label class="field">Where to meet</label>
+    <div class="loc-row">${locs.map(l=>`<div class="loc-chip" data-l="${l}" onclick="pickLoc(this,'${l}')">${l}</div>`).join('')}</div>
+    <label class="field">What do you need help with?</label>
+    <textarea id="bookingNote" placeholder="e.g. Need help structuring a financial model for my app pitch"></textarea>
+    <button class="cta gold" onclick="confirmBooking()">Confirm appointment</button>
+  `;
+  showPanel('bookingPanel');
+}
+function pickSlot(el,t){ document.querySelectorAll('.slot').forEach(x=>x.classList.remove('sel')); el.classList.add('sel'); currentSlot=t; }
+function pickLoc(el,l){ document.querySelectorAll('.loc-chip').forEach(x=>x.classList.remove('sel')); el.classList.add('sel'); currentLoc=l; }
+
+function confirmBooking(){
+  if(!currentSlot || !currentLoc){ alert("Pick a time and a meeting place first."); return; }
+  openChat(true);
+}
+
+let chatHistory = [];
+function openChat(fromBooking){
+  const s = currentStudent;
+  document.getElementById('chatTitle').textContent = s.name;
+  if(fromBooking){
+    chatHistory = [
+      {who:'them',text:`Hey! Looking forward to our session ${currentSlot} at ${currentLoc}. What should I bring?`},
+    ];
+  } else if(chatHistory.length===0){
+    chatHistory = [{who:'them',text:`Hi! What do you need help with?`}];
+  }
+  renderChat();
+  showPanel('chatPanel');
+  if(fromBooking){
+    setTimeout(()=>{ document.getElementById('bookedBanner'); }, 10);
+  }
+}
+function renderChat(){
+  document.getElementById('chatLog').innerHTML =
+    (currentSlot?`<div class="block" style="margin-top:0"><h4>Appointment confirmed</h4><div class="bio">${currentSlot} · ${currentLoc}</div><button class="cta" style="margin-top:12px" onclick="finishSession()">Mark session complete</button></div>`:"") +
+    `<div class="chat-log" style="margin-top:14px">` +
+    chatHistory.map(m=>`<div class="msg ${m.who==='me'?'me':'them'}">${m.text}</div>`).join('') +
+    `</div>`;
+}
+function sendMsg(){
+  const inp = document.getElementById('chatInput');
+  if(!inp.value.trim()) return;
+  chatHistory.push({who:'me',text:inp.value.trim()});
+  inp.value='';
+  renderChat();
+  setTimeout(()=>{
+    chatHistory.push({who:'them',text:"Sounds good, see you then! 👍"});
+    renderChat();
+  },700);
+}
+
+function finishSession(){ showPanel('reviewPanel'); renderReview(1); }
+let chosenStars = 0;
+function renderReview(fromStar){
+  chosenStars = fromStar || chosenStars;
+  document.getElementById('reviewBody').innerHTML = `
+    <div style="text-align:center;font-size:14px;color:var(--ink-soft)">How was your session with <b style="color:var(--ink)">${currentStudent.name}</b>?</div>
+    <div class="star-row">${[1,2,3,4,5].map(n=>`<span class="star ${n<=chosenStars?'on':''}" onclick="renderReview(${n})">★</span>`).join('')}</div>
+    <textarea id="reviewNote" placeholder="Optional: what did they help you with?"></textarea>
+    <button class="cta" onclick="submitReview()">Submit review & release credits</button>
+  `;
+}
+function submitReview(){
+  if(chosenStars===0){ alert("Tap a star to rate the session."); return; }
+  const base = 1; // credit per hour
+  const satisfactionBonus = chosenStars>=5 ? 1 : 0;
+  const earned = base + satisfactionBonus;
+  credits += earned;
+  document.getElementById('myCredits').textContent = credits;
+  document.getElementById('reviewBody').innerHTML = `
+    <div class="credit-award">
+      <div class="num">+${earned} 🪙</div>
+      <div class="label">credits sent to ${currentStudent.name.split(' ')[0]}, pending Tec authorization</div>
+    </div>
+    <div class="block"><h4>Why this amount</h4><div class="bio">Based on session length, skill requested, and your ${chosenStars}★ rating. Credits are redeemable for meal coupons, Borregos merch and campus bonuses once Tec approves the session log.</div></div>
+    <button class="cta ghost" onclick="closeAllPanels()">Done</button>
+  `;
+}
+
+function showPanel(id){
+  document.getElementById('overlay').classList.add('show');
+  ['profilePanel','bookingPanel','chatPanel','reviewPanel'].forEach(p=>document.getElementById(p).classList.toggle('show',p===id));
+}
+function closeAllPanels(){
+  document.getElementById('overlay').classList.remove('show');
+  ['profilePanel','bookingPanel','chatPanel','reviewPanel'].forEach(p=>document.getElementById(p).classList.remove('show'));
+}
+
+initFilters();
+renderCards();
+</script>
+</body>
+</html>
